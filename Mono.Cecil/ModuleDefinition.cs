@@ -105,7 +105,9 @@ namespace Mono.Cecil {
 			set { projections = value; }
 		}
 
-		public ReaderParameters ()
+        public Action<Guid> GuidProvider { get; set; }
+
+        public ReaderParameters ()
 			: this (ReadingMode.Deferred)
 		{
 		}
@@ -247,8 +249,10 @@ namespace Mono.Cecil {
 			get { return key_pair; }
 			set { key_pair = value; }
 		}
+
+        public Func<string, string> SourcePathRewriter { get; set; }
 #endif
-	}
+    }
 
 #endif
 

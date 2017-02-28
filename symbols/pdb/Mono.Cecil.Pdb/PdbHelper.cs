@@ -25,12 +25,12 @@ namespace Mono.Cecil.Pdb {
 			return new NativePdbReader (Disposable.Owned (File.OpenRead (Mixin.GetPdbFileName (fileName)) as Stream));
 		}
 
-		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
+		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream, Action<Guid> guidProvider)
 		{
 			Mixin.CheckModule (module);
 			Mixin.CheckStream (symbolStream);
 
-			return new NativePdbReader (Disposable.NotOwned (symbolStream));
+			return new NativePdbReader (Disposable.NotOwned (symbolStream), guidProvider);
 		}
 	}
 
@@ -46,15 +46,15 @@ namespace Mono.Cecil.Pdb {
 				: new NativePdbReaderProvider ().GetSymbolReader (module, fileName);
 		}
 
-		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
+		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream, Action<Guid> guidProvider)
 		{
 			Mixin.CheckModule (module);
 			Mixin.CheckStream (symbolStream);
 			Mixin.CheckReadSeek (symbolStream);
 
 			return Mixin.IsPortablePdb (symbolStream)
-				? new PortablePdbReaderProvider ().GetSymbolReader (module, symbolStream)
-				: new NativePdbReaderProvider ().GetSymbolReader (module, symbolStream);
+				? new PortablePdbReaderProvider ().GetSymbolReader (module, symbolStream, guidProvider)
+				: new NativePdbReaderProvider ().GetSymbolReader (module, symbolStream, guidProvider);
 		}
 	}
 
@@ -62,12 +62,12 @@ namespace Mono.Cecil.Pdb {
 
 	public sealed class NativePdbWriterProvider : ISymbolWriterProvider {
 
-		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
+		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName, Func<string, string> sourcePathRewriter)
 		{
 			Mixin.CheckModule (module);
 			Mixin.CheckFileName (fileName);
 
-			return new NativePdbWriter (module, CreateWriter (module, Mixin.GetPdbFileName (fileName)));
+			return new NativePdbWriter (module, CreateWriter (module, Mixin.GetPdbFileName (fileName)), sourcePathRewriter);
 		}
 
 		static SymWriter CreateWriter (ModuleDefinition module, string pdb)
@@ -90,15 +90,15 @@ namespace Mono.Cecil.Pdb {
 
 	public sealed class PdbWriterProvider : ISymbolWriterProvider {
 
-		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
+		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName, Func<string, string> sourcePathRewriter)
 		{
 			Mixin.CheckModule (module);
 			Mixin.CheckFileName (fileName);
 
 			if (HasPortablePdbSymbols (module))
-				return new PortablePdbWriterProvider ().GetSymbolWriter (module, fileName);
+				return new PortablePdbWriterProvider ().GetSymbolWriter (module, fileName, sourcePathRewriter);
 
-			return new NativePdbWriterProvider ().GetSymbolWriter (module, fileName);
+			return new NativePdbWriterProvider ().GetSymbolWriter (module, fileName, sourcePathRewriter);
 		}
 
 		static bool HasPortablePdbSymbols (ModuleDefinition module)

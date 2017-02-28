@@ -24,13 +24,16 @@ namespace Mono.Cecil.Pdb {
 		readonly ModuleDefinition module;
 		readonly SymWriter writer;
 		readonly Dictionary<string, SymDocumentWriter> documents;
+        readonly Func<string, string> sourcePathRewriter;
 
-		internal NativePdbWriter (ModuleDefinition module, SymWriter writer)
+
+        internal NativePdbWriter (ModuleDefinition module, SymWriter writer, Func<string, string> sourcePathRewriter = null)
 		{
 			this.module = module;
 			this.writer = writer;
 			this.documents = new Dictionary<string, SymDocumentWriter> ();
-		}
+            this.sourcePathRewriter = sourcePathRewriter;
+        }
 
 		public bool GetDebugHeader (out ImageDebugDirectory directory, out byte [] header)
 		{
@@ -118,8 +121,14 @@ namespace Mono.Cecil.Pdb {
 			if (documents.TryGetValue (document.Url, out doc_writer))
 				return doc_writer;
 
-			doc_writer = writer.DefineDocument (
-				document.Url,
+            var url = document.Url;
+            if (sourcePathRewriter != null)
+            {
+                url = sourcePathRewriter(url);
+            }
+
+            doc_writer = writer.DefineDocument (
+                url,
 				document.Language.ToGuid (),
 				document.LanguageVendor.ToGuid (),
 				document.Type.ToGuid ());

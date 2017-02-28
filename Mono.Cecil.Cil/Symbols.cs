@@ -626,7 +626,7 @@ namespace Mono.Cecil.Cil {
 #if !PCL
 		ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName);
 #endif
-		ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream);
+		ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream, Action<Guid> guidProvider);
 	}
 
 #if !PCL
@@ -666,7 +666,7 @@ namespace Mono.Cecil.Cil {
 			return null;
 		}
 
-		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
+		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream, Action<Guid> guidProvider)
 		{
 			throw new NotSupportedException ();
 		}
@@ -796,7 +796,7 @@ namespace Mono.Cecil.Cil {
 	public interface ISymbolWriterProvider {
 
 #if !PCL
-		ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName);
+		ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName, Func<string, string> sourcePathRewriter);
 #endif
 		ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream);
 	}
@@ -804,7 +804,7 @@ namespace Mono.Cecil.Cil {
 #if !PCL
 	public class DefaultSymbolWriterProvider : ISymbolWriterProvider {
 
-		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
+		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName, Func<string, string> sourcePathRewriter)
 		{
 			var reader = module.SymbolReader;
 			if (reader == null)
@@ -814,7 +814,7 @@ namespace Mono.Cecil.Cil {
 				return null;
 
 			var reader_kind = SymbolProvider.GetSymbolKind (reader.GetType ());
-			return SymbolProvider.GetWriterProvider (reader_kind).GetSymbolWriter (module, fileName);
+			return SymbolProvider.GetWriterProvider (reader_kind).GetSymbolWriter (module, fileName, sourcePathRewriter);
 		}
 
 		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream)

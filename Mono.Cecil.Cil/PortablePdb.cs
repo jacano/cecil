@@ -30,7 +30,7 @@ namespace Mono.Cecil.Cil {
 		}
 #endif
 
-		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
+		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream, Action<Guid> guidProvider)
 		{
 			Mixin.CheckModule (module);
 			Mixin.CheckStream (symbolStream);
@@ -137,7 +137,7 @@ namespace Mono.Cecil.Cil {
 	public sealed class PortablePdbWriterProvider : ISymbolWriterProvider
 	{
 #if !PCL
-		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
+		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName, Func<string, string> sourcePathRewriter)
 		{
 			Mixin.CheckModule (module);
 			Mixin.CheckFileName (fileName);
