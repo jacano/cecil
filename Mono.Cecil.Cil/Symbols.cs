@@ -796,7 +796,7 @@ namespace Mono.Cecil.Cil {
 	public interface ISymbolWriterProvider {
 
 #if !PCL
-		ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName, Func<string, string> sourcePathRewriter);
+		ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName, Func<string, string> sourcePathRewriter, Action<Guid> guidProvider);
 #endif
 		ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream);
 	}
@@ -804,7 +804,7 @@ namespace Mono.Cecil.Cil {
 #if !PCL
 	public class DefaultSymbolWriterProvider : ISymbolWriterProvider {
 
-		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName, Func<string, string> sourcePathRewriter)
+		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName, Func<string, string> sourcePathRewriter, Action<Guid> guidProvider)
 		{
 			var reader = module.SymbolReader;
 			if (reader == null)
@@ -814,7 +814,7 @@ namespace Mono.Cecil.Cil {
 				return null;
 
 			var reader_kind = SymbolProvider.GetSymbolKind (reader.GetType ());
-			return SymbolProvider.GetWriterProvider (reader_kind).GetSymbolWriter (module, fileName, sourcePathRewriter);
+			return SymbolProvider.GetWriterProvider (reader_kind).GetSymbolWriter (module, fileName, sourcePathRewriter, guidProvider);
 		}
 
 		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream)

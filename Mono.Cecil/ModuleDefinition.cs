@@ -251,6 +251,8 @@ namespace Mono.Cecil {
 		}
 
         public Func<string, string> SourcePathRewriter { get; set; }
+
+        public Action<Guid> GuidProvider { get; set; }
 #endif
     }
 

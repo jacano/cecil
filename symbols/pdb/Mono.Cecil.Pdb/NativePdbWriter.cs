@@ -25,23 +25,56 @@ namespace Mono.Cecil.Pdb {
 		readonly SymWriter writer;
 		readonly Dictionary<string, SymDocumentWriter> documents;
         readonly Func<string, string> sourcePathRewriter;
+        readonly Action<Guid> guidProvider;
+        private Guid guid;
+        private int age;
 
-
-        internal NativePdbWriter (ModuleDefinition module, SymWriter writer, Func<string, string> sourcePathRewriter = null)
+        internal NativePdbWriter (ModuleDefinition module, SymWriter writer, Func<string, string> sourcePathRewriter = null, Action<Guid> guidProvider = null)
 		{
 			this.module = module;
 			this.writer = writer;
 			this.documents = new Dictionary<string, SymDocumentWriter> ();
             this.sourcePathRewriter = sourcePathRewriter;
+            this.guidProvider = guidProvider;
         }
 
 		public bool GetDebugHeader (out ImageDebugDirectory directory, out byte [] header)
 		{
 			header = writer.GetDebugInfo (out directory);
-			return true;
+
+            if (directory.Type != 2) //IMAGE_DEBUG_TYPE_CODEVIEW
+                return false;
+            if (directory.MajorVersion != 0 || directory.MinorVersion != 0)
+                return false;
+
+            if (header.Length < 24)
+                return false;
+
+            var magic = ReadInt32(header, 0);
+            if (magic != 0x53445352)
+                return false;
+
+            var guid_bytes = new byte[16];
+            Buffer.BlockCopy(header, 4, guid_bytes, 0, 16);
+
+            this.guid = new Guid(guid_bytes);
+
+            this.guidProvider?.Invoke(guid);
+
+            this.age = ReadInt32(header, 20);
+
+            return true;
 		}
 
-		public void Write (MethodDebugInformation info)
+        static int ReadInt32(byte[] bytes, int start)
+        {
+            return (bytes[start]
+                | (bytes[start + 1] << 8)
+                | (bytes[start + 2] << 16)
+                | (bytes[start + 3] << 24));
+        }
+
+        public void Write (MethodDebugInformation info)
 		{
 			var method_token = info.method.MetadataToken;
 			var sym_token = new SymbolToken (method_token.ToInt32 ());

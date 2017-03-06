@@ -137,7 +137,7 @@ namespace Mono.Cecil.Cil {
 	public sealed class PortablePdbWriterProvider : ISymbolWriterProvider
 	{
 #if !PCL
-		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName, Func<string, string> sourcePathRewriter)
+		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName, Func<string, string> sourcePathRewriter, Action<Guid> guidProvider)
 		{
 			Mixin.CheckModule (module);
 			Mixin.CheckFileName (fileName);
