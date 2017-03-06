@@ -14,6 +14,7 @@ using System.IO;
 
 using Mono.Cecil.Metadata;
 using Mono.Cecil.PE;
+using Mono.Cecil.Mono.Cecil;
 
 namespace Mono.Cecil.Cil {
 
@@ -30,7 +31,7 @@ namespace Mono.Cecil.Cil {
 		}
 #endif
 
-		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream, Action<Guid> guidProvider)
+		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream, Action<Signature> signatureProvider)
 		{
 			Mixin.CheckModule (module);
 			Mixin.CheckStream (symbolStream);
@@ -137,7 +138,7 @@ namespace Mono.Cecil.Cil {
 	public sealed class PortablePdbWriterProvider : ISymbolWriterProvider
 	{
 #if !PCL
-		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName, Func<string, string> sourcePathRewriter, Action<Guid> guidProvider)
+		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName, Func<string, string> sourcePathRewriter, Action<Signature> signatureProvider)
 		{
 			Mixin.CheckModule (module);
 			Mixin.CheckFileName (fileName);

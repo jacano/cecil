@@ -147,7 +147,7 @@ namespace Mono.Cecil {
 				return symbol_writer_provider.GetSymbolWriter (module, parameters.SymbolStream);
 
 #if !PCL
-			return symbol_writer_provider.GetSymbolWriter (module, fq_name, parameters.SourcePathRewriter, parameters.GuidProvider);
+			return symbol_writer_provider.GetSymbolWriter (module, fq_name, parameters.SourcePathRewriter, parameters.SignatureProvider);
 #else
 			return null;
 #endif

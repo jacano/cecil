@@ -17,6 +17,7 @@ using Mono.Collections.Generic;
 using Microsoft.Cci.Pdb;
 
 using Mono.Cecil.Cil;
+using Mono.Cecil.Mono.Cecil;
 
 namespace Mono.Cecil.Pdb {
 
@@ -25,15 +26,15 @@ namespace Mono.Cecil.Pdb {
 		int age;
 		Guid guid;
 
-        readonly Action<Guid> guidProvider;
+        readonly Action<Signature> signatureProvider;
 
         readonly Disposable<Stream> pdb_file;
 		readonly Dictionary<string, Document> documents = new Dictionary<string, Document> ();
 		readonly Dictionary<uint, PdbFunction> functions = new Dictionary<uint, PdbFunction> ();
 
-		internal NativePdbReader (Disposable<Stream> file, Action<Guid> guidProvider = null)
+		internal NativePdbReader (Disposable<Stream> file, Action<Signature> signatureProvider = null)
 		{
-            this.guidProvider = guidProvider;
+            this.signatureProvider = signatureProvider;
 			this.pdb_file = file;
 		}
 
@@ -62,10 +63,13 @@ namespace Mono.Cecil.Pdb {
 			Buffer.BlockCopy (header, 4, guid_bytes, 0, 16);
 
 			this.guid = new Guid (guid_bytes);
+            this.age = ReadInt32(header, 20);
 
-            this.guidProvider?.Invoke(guid);
-
-            this.age = ReadInt32 (header, 20);
+            this.signatureProvider?.Invoke(new Signature()
+            {
+                Guid = guid,
+                Age = age,
+            });
 
 			return PopulateFunctions ();
 		}

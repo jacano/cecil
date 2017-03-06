@@ -18,6 +18,7 @@ using Mono.Cecil.Cil;
 using Mono.Cecil.Metadata;
 using Mono.Cecil.PE;
 using Mono.Collections.Generic;
+using Mono.Cecil.Mono.Cecil;
 
 namespace Mono.Cecil {
 
@@ -105,7 +106,7 @@ namespace Mono.Cecil {
 			set { projections = value; }
 		}
 
-        public Action<Guid> GuidProvider { get; set; }
+        public Action<Signature> SignatureProvider { get; set; }
 
         public ReaderParameters ()
 			: this (ReadingMode.Deferred)
@@ -252,7 +253,7 @@ namespace Mono.Cecil {
 
         public Func<string, string> SourcePathRewriter { get; set; }
 
-        public Action<Guid> GuidProvider { get; set; }
+        public Action<Signature> SignatureProvider { get; set; }
 #endif
     }
 

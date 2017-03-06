@@ -14,6 +14,7 @@ using System.Diagnostics.SymbolStore;
 
 using Mono.Cecil.Cil;
 using Mono.Collections.Generic;
+using Mono.Cecil.Mono.Cecil;
 
 #if !READ_ONLY
 
@@ -25,17 +26,17 @@ namespace Mono.Cecil.Pdb {
 		readonly SymWriter writer;
 		readonly Dictionary<string, SymDocumentWriter> documents;
         readonly Func<string, string> sourcePathRewriter;
-        readonly Action<Guid> guidProvider;
+        readonly Action<Signature> signatureProvider;
         private Guid guid;
         private int age;
 
-        internal NativePdbWriter (ModuleDefinition module, SymWriter writer, Func<string, string> sourcePathRewriter = null, Action<Guid> guidProvider = null)
+        internal NativePdbWriter (ModuleDefinition module, SymWriter writer, Func<string, string> sourcePathRewriter = null, Action<Signature> signatureProvider = null)
 		{
 			this.module = module;
 			this.writer = writer;
 			this.documents = new Dictionary<string, SymDocumentWriter> ();
             this.sourcePathRewriter = sourcePathRewriter;
-            this.guidProvider = guidProvider;
+            this.signatureProvider = signatureProvider;
         }
 
 		public bool GetDebugHeader (out ImageDebugDirectory directory, out byte [] header)
@@ -58,10 +59,13 @@ namespace Mono.Cecil.Pdb {
             Buffer.BlockCopy(header, 4, guid_bytes, 0, 16);
 
             this.guid = new Guid(guid_bytes);
-
-            this.guidProvider?.Invoke(guid);
-
             this.age = ReadInt32(header, 20);
+
+            this.signatureProvider?.Invoke(new Signature()
+            {
+                Guid = guid,
+                Age = age
+            });
 
             return true;
 		}

@@ -104,7 +104,7 @@ namespace Mono.Cecil {
 				module.SymbolReaderProvider = symbol_reader_provider;
 #if !PCL
 				var reader = parameters.SymbolStream != null
-					? symbol_reader_provider.GetSymbolReader (module, parameters.SymbolStream, parameters.GuidProvider)
+					? symbol_reader_provider.GetSymbolReader (module, parameters.SymbolStream, parameters.SignatureProvider)
 					: symbol_reader_provider.GetSymbolReader (module, module.FileName);
 #else
 				if (parameters.SymbolStream == null)
